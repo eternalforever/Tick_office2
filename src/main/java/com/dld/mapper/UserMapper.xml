@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dld.dao.UserMapper">
+  <resultMap id="BaseResultMap" type="com.dld.entity.User">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="no" jdbcType="VARCHAR" property="no" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="flag" jdbcType="INTEGER" property="flag" />
+    <result column="headphoto" jdbcType="VARCHAR" property="headphoto" />
+    <collection property="role"
+    	ofType="com.dld.entity.Role" fetchType="eager">
+    	
+    	<result column="info" jdbcType="VARCHAR" property="info" />
+	    <result column="name" jdbcType="VARCHAR" property="name" />
+	    <result column="parentId" jdbcType="INTEGER" property="parentid" />
+    </collection>
+  </resultMap>
+  
+  <sql id="Base_Column_List">
+    id, no, password, name, flag, headphoto
+  </sql>
+  <select id="findByName" parameterType="string" resultType="com.dld.entity.User">
+    select 
+    <include refid="Base_Column_List" />
+    from t_user
+    where name = #{name,jdbcType=INTEGER}
+  </select>
+  <select id="findAllRole" parameterType="map" resultMap="BaseResultMap">
+	select u.id,u.no,u.name,r.info,u.flag from t_role r
+	left join t_userrole ur on r.id=ur.rid 
+	left join t_user u on u.id=ur.uid limit #{index},#{size}
+	</select>
+	<select id="count" resultType="int">
+	select count(1) from t_user
+	
+	</select>
+	
+	<delete id="deleteUserRole" parameterType="map">
+	delete from t_userrole where uid=#{uid} and rid=#{rid}
+	</delete>
+	<insert id="addUserRole" parameterType="map">
+		insert into t_userrole(uid,rid) values(#{uid},#{rid})
+	</insert>
+	
+  <insert id="addUser" parameterType="com.dld.entity.User">
+    insert into t_user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="no != null">
+        no,
+      </if>
+      <if test="password != null">
+        password,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="flag != null">
+        flag,
+      </if>
+      <if test="headphoto != null">
+        headphoto,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="no != null">
+        #{no,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="flag != null">
+        #{flag,jdbcType=INTEGER},
+      </if>
+      <if test="headphoto != null">
+        #{headphoto,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  
+</mapper>

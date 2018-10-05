@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dld.dao.AuthorityMapper">
+  <resultMap id="BaseResultMap" type="com.dld.entity.Authority">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="aicon" jdbcType="VARCHAR" property="aicon" />
+    <result column="aurl" jdbcType="VARCHAR" property="aurl" />
+    <result column="parentId" jdbcType="INTEGER" property="parentid" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+   	<collection property="child"  
+		ofType="com.dld.entity.Authority" 
+		column="id" 
+		select="findByParent">
+		</collection>
+  </resultMap>
+  
+  <sql id="Base_Column_List">
+    id, aicon, aurl, parentId, title, type
+  </sql>
+  <select id="findByName" parameterType="string" resultMap="BaseResultMap">
+   SELECT a.* FROM t_user u
+	INNER JOIN t_userrole ur ON ur.uid=u.id
+	INNER JOIN t_roleauthority ar ON ar.rid=ur.rid
+	INNER JOIN t_authority a on a.id=ar.aid
+	INNER JOIN t_role r ON r.parentId=a.parentId 
+	WHERE u.name=#{name}
+	</select>
+	<select id="findPermits" resultType="com.dld.entity.Authority">
+		select * from t_authority limit #{index},#{size}
+	</select>
+		
+  <select id="findRoleAuthorty"   resultMap="BaseResultMap">
+    SELECT * FROM t_authority 
+   </select>
+   
+	 <select id="allAuthority" resultType="com.dld.entity.Authority">
+		select id,title from t_authority
+	</select>
+	 <select id="AllRoleAuthority" resultType="com.dld.entity.Authority">
+		select 
+    a.*
+    from t_role r
+    inner join t_roleauthority  ar on ar.rid=r.id
+    inner join t_authority a on a.id=ar.aid where r.id=#{id}
+	</select>
+	<select id="findByTitle"  parameterType="string" resultType="com.dld.entity.Authority">
+		select * from t_authority where title=#{title}
+	</select> 
+	
+  	<select id="findMenu"  resultMap="BaseResultMap">
+		select a.id,a.title  from t_authority a 
+		left join t_roleauthority ra on a.id=ra.aid 
+		left join t_userrole ur on ra.rid=ur.rid 
+		 where a.parentId=0 and ur.uid=#{id}
+	</select>
+	<select id="count" resultType="int">
+		select count(1) from t_authority
+	</select>
+	<select id="findByParent" parameterType="java.lang.Integer"  resultMap="BaseResultMap">
+		select * from t_authority where parentid=#{id}
+	</select>
+	<select id="findById" parameterType="java.lang.Integer"  resultMap="BaseResultMap">
+		select * from t_authority where id=#{id}
+	</select>
+	<delete id="deleteById" parameterType="int">
+	delete from t_authority where id=#{id}
+	</delete>
+  <select id="findRoleByName" parameterType="string" resultType="string">
+   	SELECT DISTINCT r.info FROM t_user u
+	INNER JOIN t_userrole ur ON u.id=ur.uid
+	INNER JOIN t_role r ON ur.rid=r.id
+	WHERE u.name=#{name}
+  </select>
+  <select id="findPermitByName" parameterType="string" resultType="string">
+   SELECT DISTINCT a.title FROM t_user u
+	INNER JOIN t_userrole ur ON ur.uid=u.id
+	INNER JOIN t_roleauthority ar ON ar.rid=ur.rid
+	INNER JOIN t_authority a on a.id=ar.aid
+	INNER JOIN t_role r ON r.parentId=a.parentId 
+	WHERE u.name=#{name}
+  </select>
+  <update id="updateAuthority" parameterType="com.dld.entity.Authority">
+  	update t_authority
+    set aicon = #{aicon},
+      aurl = #{aurl},
+      parentId = #{parentid},
+      title = #{title},
+      type = #{type}
+    where id = #{id} 
+  </update>
+ 
+  <insert id="addSelective" parameterType="com.dld.entity.Authority">
+    insert into t_authority(id,aicon,aurl,parentId,title,type)
+        values(#{id}, #{aicon},#{aurl}, #{parentid},#{title}, #{type})
+  </insert>
+</mapper>

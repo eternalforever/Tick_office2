@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dld.dao.RoleMapper">
+  <resultMap id="BaseResultMap" type="com.dld.entity.Role">
+	<id column="id" jdbcType="INTEGER" property="id" />
+	<result column="info" jdbcType="VARCHAR" property="info" />
+	<result column="name" jdbcType="VARCHAR" property="name" />
+	<result column="parentId" jdbcType="INTEGER" property="parentid" />
+
+	<collection property="authority"
+		ofType="com.dld.entity.Authority" javaType="java.util.ArrayList"
+		column="id" select="com.dld.dao.AuthorityMapper.AllRoleAuthority">
+		</collection>
+   
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, info, name, parentId
+  </sql>
+  <select id="findByRoleId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_role
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+	<select id="count" resultType="int">
+	select count(1) from t_role
+	</select>
+	<select id="aids" parameterType="int"  resultType="int">
+	select aid from t_roleauthority where rid=#{rid}
+	</select>
+ <delete id="deleteRoleAuthority" parameterType="map">
+	delete from t_roleauthority where rid=#{rid} and aid=#{aid}
+	</delete>
+	<insert id="addRoleAuthority" parameterType="map">
+		insert into t_roleauthority(rid,aid) values(#{rid},#{aid})
+	</insert>
+	
+  <select id="findRoles"  parameterType="map"  resultMap="BaseResultMap">
+    select 
+    distinct r.*
+    from t_role r
+    inner join t_roleauthority  ar on ar.rid=r.id
+    inner join t_authority a on a.id=ar.aid order by r.id<if test="size!=0">
+    limit #{index},#{size}
+    </if> 
+  </select>
+  <insert id="addRole" parameterType="com.dld.entity.Role">
+    insert into t_role (id, info, name, 
+      parentId)
+    values (#{id,jdbcType=INTEGER}, #{info,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{parentid,jdbcType=INTEGER})
+  </insert>
+  
+</mapper>
