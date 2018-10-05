@@ -45,6 +45,8 @@ public class LoginLogService implements ILoginLogService {
 	
 	@Override
 	public int count() {
+		System.out.print("hhhhhhh");
+		System.out.println("LoginLogService.count");
 		// TODO Auto-generated method stub
 		return loginLogDao.count();
 		
